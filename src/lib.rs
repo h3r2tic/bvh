@@ -39,9 +39,6 @@
 //!     }
 //! }
 //!
-//! impl BHShape for Sphere {
-//! }
-//!
 //! let mut spheres = Vec::new();
 //! for i in 0..1000u32 {
 //!     let position = Point3::new(i as f32, i as f32, i as f32);

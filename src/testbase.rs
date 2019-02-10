@@ -9,7 +9,7 @@ use obj::raw::object::Polygon;
 use obj::*;
 
 use crate::aabb::{Bounded, AABB};
-use crate::bounding_hierarchy::{BHShape, BoundingHierarchy};
+use crate::bounding_hierarchy::BoundingHierarchy;
 use crate::ray::Ray;
 
 /// A vector represented as a tuple
@@ -45,8 +45,6 @@ impl Bounded for UnitBox {
         AABB::with_bounds(min, max)
     }
 }
-
-impl BHShape for UnitBox {}
 
 /// Generate 21 `UnitBox`s along the X axis centered on whole numbers (-10,9,..,10).
 /// The index is set to the rounded x-coordinate of the box center.
@@ -153,8 +151,6 @@ impl Bounded for Triangle {
         self.aabb
     }
 }
-
-impl BHShape for Triangle {}
 
 impl FromRawVertex for Triangle {
     fn process(

@@ -1,10 +1,7 @@
 //! This module defines the `BoundingHierarchy` trait.
 
-use crate::aabb::Bounded;
+pub use crate::aabb::Bounded as BHShape;
 use crate::ray::Ray;
-
-/// Dummy
-pub trait BHShape: Bounded {}
 
 /// This trait defines an acceleration structure with space partitioning.
 /// This structure is used to efficiently compute ray-scene intersections.
@@ -40,9 +37,6 @@ pub trait BoundingHierarchy {
     /// #         let max = self.pos + Vector3::new(0.5, 0.5, 0.5);
     /// #         AABB::with_bounds(min, max)
     /// #     }
-    /// # }
-    /// #
-    /// # impl BHShape for UnitBox {
     /// # }
     /// #
     /// # fn create_bhshapes() -> Vec<UnitBox> {
@@ -100,9 +94,6 @@ pub trait BoundingHierarchy {
     /// #         let max = self.pos + Vector3::new(0.5, 0.5, 0.5);
     /// #         AABB::with_bounds(min, max)
     /// #     }
-    /// # }
-    /// #
-    /// # impl BHShape for UnitBox {
     /// # }
     /// #
     /// # fn create_bvh() -> (BVH, Vec<UnitBox>) {
