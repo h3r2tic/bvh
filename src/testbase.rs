@@ -3,14 +3,10 @@
 
 use std::collections::HashSet;
 use std::f32;
-use std::mem::transmute;
 
 use nalgebra::{Point3, Vector3};
 use obj::raw::object::Polygon;
 use obj::*;
-use rand::rngs::StdRng;
-use rand::seq::SliceRandom;
-use rand::SeedableRng;
 
 use crate::aabb::{Bounded, AABB};
 use crate::bounding_hierarchy::{BHShape, BoundingHierarchy};
@@ -33,16 +29,11 @@ pub fn tuple_to_vector(tpl: &TupleVec) -> Vector3<f32> {
 pub struct UnitBox {
     pub id: i32,
     pub pos: Point3<f32>,
-    node_index: usize,
 }
 
 impl UnitBox {
     pub fn new(id: i32, pos: Point3<f32>) -> UnitBox {
-        UnitBox {
-            id: id,
-            pos: pos,
-            node_index: 0,
-        }
+        UnitBox { id: id, pos: pos }
     }
 }
 
@@ -55,15 +46,7 @@ impl Bounded for UnitBox {
     }
 }
 
-impl BHShape for UnitBox {
-    fn set_bh_node_index(&mut self, index: usize) {
-        self.node_index = index;
-    }
-
-    fn bh_node_index(&self) -> usize {
-        self.node_index
-    }
-}
+impl BHShape for UnitBox {}
 
 /// Generate 21 `UnitBox`s along the X axis centered on whole numbers (-10,9,..,10).
 /// The index is set to the rounded x-coordinate of the box center.
@@ -171,15 +154,7 @@ impl Bounded for Triangle {
     }
 }
 
-impl BHShape for Triangle {
-    fn set_bh_node_index(&mut self, index: usize) {
-        self.node_index = index;
-    }
-
-    fn bh_node_index(&self) -> usize {
-        self.node_index
-    }
-}
+impl BHShape for Triangle {}
 
 impl FromRawVertex for Triangle {
     fn process(
@@ -224,135 +199,6 @@ impl FromRawVertex for Triangle {
     }
 }
 
-/// Creates a unit size cube centered at `pos` and pushes the triangles to `shapes`.
-fn push_cube(pos: Point3<f32>, shapes: &mut Vec<Triangle>) {
-    let top_front_right = pos + Vector3::new(0.5, 0.5, -0.5);
-    let top_back_right = pos + Vector3::new(0.5, 0.5, 0.5);
-    let top_back_left = pos + Vector3::new(-0.5, 0.5, 0.5);
-    let top_front_left = pos + Vector3::new(-0.5, 0.5, -0.5);
-    let bottom_front_right = pos + Vector3::new(0.5, -0.5, -0.5);
-    let bottom_back_right = pos + Vector3::new(0.5, -0.5, 0.5);
-    let bottom_back_left = pos + Vector3::new(-0.5, -0.5, 0.5);
-    let bottom_front_left = pos + Vector3::new(-0.5, -0.5, -0.5);
-
-    shapes.push(Triangle::new(
-        top_back_right,
-        top_front_right,
-        top_front_left,
-    ));
-    shapes.push(Triangle::new(top_front_left, top_back_left, top_back_right));
-    shapes.push(Triangle::new(
-        bottom_front_left,
-        bottom_front_right,
-        bottom_back_right,
-    ));
-    shapes.push(Triangle::new(
-        bottom_back_right,
-        bottom_back_left,
-        bottom_front_left,
-    ));
-    shapes.push(Triangle::new(
-        top_back_left,
-        top_front_left,
-        bottom_front_left,
-    ));
-    shapes.push(Triangle::new(
-        bottom_front_left,
-        bottom_back_left,
-        top_back_left,
-    ));
-    shapes.push(Triangle::new(
-        bottom_front_right,
-        top_front_right,
-        top_back_right,
-    ));
-    shapes.push(Triangle::new(
-        top_back_right,
-        bottom_back_right,
-        bottom_front_right,
-    ));
-    shapes.push(Triangle::new(
-        top_front_left,
-        top_front_right,
-        bottom_front_right,
-    ));
-    shapes.push(Triangle::new(
-        bottom_front_right,
-        bottom_front_left,
-        top_front_left,
-    ));
-    shapes.push(Triangle::new(
-        bottom_back_right,
-        top_back_right,
-        top_back_left,
-    ));
-    shapes.push(Triangle::new(
-        top_back_left,
-        bottom_back_left,
-        bottom_back_right,
-    ));
-}
-
-/// Implementation of splitmix64.
-/// For reference see: http://xoroshiro.di.unimi.it/splitmix64.c
-fn splitmix64(x: &mut u64) -> u64 {
-    *x = x.wrapping_add(0x9E3779B97F4A7C15u64);
-    let mut z = *x;
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9u64);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EBu64);
-    z ^ (z >> 31)
-}
-
-/// Generates a new `i32` triple. Mutates the seed.
-pub fn next_point3_raw(seed: &mut u64) -> (i32, i32, i32) {
-    let u = splitmix64(seed);
-    let a = ((u >> 32) & 0xFFFFFFFF) as i64 - 0x80000000;
-    let b = (u & 0xFFFFFFFF) as i64 - 0x80000000;
-    let c = a ^ b.rotate_left(6);
-    (a as i32, b as i32, c as i32)
-}
-
-/// Generates a new `Point3`, which will lie inside the given `aabb`. Mutates the seed.
-pub fn next_point3(seed: &mut u64, aabb: &AABB) -> Point3<f32> {
-    let (a, b, c) = next_point3_raw(seed);
-    use std::i32;
-    let float_vector = Vector3::new(
-        (a as f32 / i32::MAX as f32) + 1.0,
-        (b as f32 / i32::MAX as f32) + 1.0,
-        (c as f32 / i32::MAX as f32) + 1.0,
-    ) * 0.5;
-
-    assert!(float_vector.x >= 0.0 && float_vector.x <= 1.0);
-    assert!(float_vector.y >= 0.0 && float_vector.y <= 1.0);
-    assert!(float_vector.z >= 0.0 && float_vector.z <= 1.0);
-
-    let size = aabb.size();
-    let offset = Vector3::new(
-        float_vector.x * size.x,
-        float_vector.y * size.y,
-        float_vector.z * size.z,
-    );
-    aabb.min + offset
-}
-
-/// Returns an `AABB` which defines the default testing space bounds.
-pub fn default_bounds() -> AABB {
-    AABB::with_bounds(
-        Point3::new(-100_000.0, -100_000.0, -100_000.0),
-        Point3::new(100_000.0, 100_000.0, 100_000.0),
-    )
-}
-
-/// Creates `n` deterministic random cubes. Returns the `Vec` of surface `Triangle`s.
-pub fn create_n_cubes(n: usize, bounds: &AABB) -> Vec<Triangle> {
-    let mut vec = Vec::new();
-    let mut seed = 0;
-    for _ in 0..n {
-        push_cube(next_point3(&mut seed, bounds), &mut vec);
-    }
-    vec
-}
-
 /// Loads the sponza model.
 #[cfg(feature = "bench")]
 pub fn load_sponza_scene() -> (Vec<Triangle>, AABB) {
@@ -370,57 +216,6 @@ pub fn load_sponza_scene() -> (Vec<Triangle>, AABB) {
     }
 
     (triangles, bounds)
-}
-
-/// This functions moves `amount` shapes in the `triangles` array to a new position inside
-/// `bounds`. If `max_offset_option` is not `None` then the wrapped value is used as the maximum
-/// offset of a shape. This is used to simulate a realistic scene.
-/// Returns a `HashSet` of indices of modified triangles.
-pub fn randomly_transform_scene(
-    triangles: &mut Vec<Triangle>,
-    amount: usize,
-    bounds: &AABB,
-    max_offset_option: Option<f32>,
-    seed: &mut u64,
-) -> HashSet<usize> {
-    let mut indices: Vec<usize> = (0..triangles.len()).collect();
-    let mut seed_array = [0u8; 32];
-    for i in 0..seed_array.len() {
-        let bytes: [u8; 8] = unsafe { transmute(seed.to_be()) };
-        seed_array[i] = bytes[i % 8];
-    }
-    let mut rng: StdRng = SeedableRng::from_seed(seed_array);
-    indices.shuffle(&mut rng);
-    indices.truncate(amount);
-
-    let max_offset = if let Some(value) = max_offset_option {
-        value
-    } else {
-        f32::INFINITY
-    };
-
-    for index in &indices {
-        let aabb = triangles[*index].aabb();
-        let min_move_bound = bounds.min - aabb.min.coords;
-        let max_move_bound = bounds.max - aabb.max.coords;
-        let movement_bounds = AABB::with_bounds(min_move_bound, max_move_bound);
-
-        let mut random_offset = next_point3(seed, &movement_bounds).coords;
-        random_offset.x = max_offset.min((-max_offset).max(random_offset.x));
-        random_offset.y = max_offset.min((-max_offset).max(random_offset.y));
-        random_offset.z = max_offset.min((-max_offset).max(random_offset.z));
-
-        let triangle = &mut triangles[*index];
-        let old_index = triangle.bh_node_index();
-        *triangle = Triangle::new(
-            triangle.a + random_offset,
-            triangle.b + random_offset,
-            triangle.c + random_offset,
-        );
-        triangle.set_bh_node_index(old_index);
-    }
-
-    indices.into_iter().collect()
 }
 
 /// Creates a `Ray` from the random `seed`. Mutates the `seed`.

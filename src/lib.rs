@@ -27,8 +27,7 @@
 //!
 //! struct Sphere {
 //!     position: Point3<f32>,
-//!     radius: f32,
-//!     node_index: usize,
+//!     radius: f32
 //! }
 //!
 //! impl Bounded for Sphere {
@@ -41,13 +40,6 @@
 //! }
 //!
 //! impl BHShape for Sphere {
-//!     fn set_bh_node_index(&mut self, index: usize) {
-//!         self.node_index = index;
-//!     }
-//!
-//!     fn bh_node_index(&self) -> usize {
-//!         self.node_index
-//!     }
 //! }
 //!
 //! let mut spheres = Vec::new();
@@ -57,7 +49,6 @@
 //!     spheres.push(Sphere {
 //!         position: position,
 //!         radius: radius,
-//!         node_index: 0,
 //!     });
 //! }
 //!
@@ -84,7 +75,6 @@ pub mod aabb;
 pub mod axis;
 pub mod bounding_hierarchy;
 pub mod bvh;
-pub mod flat_bvh;
 pub mod ray;
 mod utils;
 

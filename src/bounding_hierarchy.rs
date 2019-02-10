@@ -3,24 +3,8 @@
 use crate::aabb::Bounded;
 use crate::ray::Ray;
 
-/// Describes a shape as referenced by a [`BoundingHierarchy`] leaf node.
-/// Knows the index of the node in the [`BoundingHierarchy`] it is in.
-///
-/// [`BoundingHierarchy`]: struct.BoundingHierarchy.html
-///
-pub trait BHShape: Bounded {
-    /// Sets the index of the referenced [`BoundingHierarchy`] node.
-    ///
-    /// [`BoundingHierarchy`]: struct.BoundingHierarchy.html
-    ///
-    fn set_bh_node_index(&mut self, _: usize);
-
-    /// Gets the index of the referenced [`BoundingHierarchy`] node.
-    ///
-    /// [`BoundingHierarchy`]: struct.BoundingHierarchy.html
-    ///
-    fn bh_node_index(&self) -> usize;
-}
+/// Dummy
+pub trait BHShape: Bounded {}
 
 /// This trait defines an acceleration structure with space partitioning.
 /// This structure is used to efficiently compute ray-scene intersections.
@@ -59,13 +43,6 @@ pub trait BoundingHierarchy {
     /// # }
     /// #
     /// # impl BHShape for UnitBox {
-    /// #     fn set_bh_node_index(&mut self, index: usize) {
-    /// #         self.node_index = index;
-    /// #     }
-    /// #
-    /// #     fn bh_node_index(&self) -> usize {
-    /// #         self.node_index
-    /// #     }
     /// # }
     /// #
     /// # fn create_bhshapes() -> Vec<UnitBox> {
@@ -83,17 +60,11 @@ pub trait BoundingHierarchy {
     ///     use bvh::bvh::BVH;
     ///     let bvh = BVH::build(&mut shapes);
     /// }
-    ///
-    /// // Or construct a `FlatBVH`.
-    /// {
-    ///     use bvh::flat_bvh::FlatBVH;
-    ///     let bvh = FlatBVH::build(&mut shapes);
-    /// }
     /// ```
     ///
     /// [`BoundingHierarchy`]: trait.BoundingHierarchy.html
     ///
-    fn build<Shape: BHShape>(shapes: &mut [Shape]) -> Self;
+    fn build<Shape: BHShape>(shapes: &[Shape]) -> Self;
 
     /// Traverses the [`BoundingHierarchy`].
     /// Returns a subset of `shapes`, in which the [`AABB`]s of the elements were hit by `ray`.
@@ -132,13 +103,6 @@ pub trait BoundingHierarchy {
     /// # }
     /// #
     /// # impl BHShape for UnitBox {
-    /// #     fn set_bh_node_index(&mut self, index: usize) {
-    /// #         self.node_index = index;
-    /// #     }
-    /// #
-    /// #     fn bh_node_index(&self) -> usize {
-    /// #         self.node_index
-    /// #     }
     /// # }
     /// #
     /// # fn create_bvh() -> (BVH, Vec<UnitBox>) {

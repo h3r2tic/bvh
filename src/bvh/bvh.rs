@@ -225,7 +225,7 @@ impl BVHNode {
     /// [`BVHNode`]: enum.BVHNode.html
     ///
     pub fn build<T: BHShape>(
-        shapes: &mut [T],
+        shapes: &[T],
         indices: &[usize],
         nodes: &mut Vec<BVHNode>,
         parent_index: usize,
@@ -257,8 +257,6 @@ impl BVHNode {
                 depth,
                 shape_index,
             });
-            // Let the shape know the index of the node that represents it.
-            shapes[shape_index].set_bh_node_index(node_index);
             return node_index;
         }
 
@@ -413,7 +411,7 @@ impl BVH {
     ///
     /// [`BVH`]: struct.BVH.html
     ///
-    pub fn build<Shape: BHShape>(shapes: &mut [Shape]) -> BVH {
+    pub fn build<Shape: BHShape>(shapes: &[Shape]) -> BVH {
         let indices = (0..shapes.len()).collect::<Vec<usize>>();
         let expected_node_count = shapes.len() * 2;
         let mut nodes = Vec::with_capacity(expected_node_count);
@@ -695,7 +693,7 @@ impl BVH {
 }
 
 impl BoundingHierarchy for BVH {
-    fn build<Shape: BHShape>(shapes: &mut [Shape]) -> BVH {
+    fn build<Shape: BHShape>(shapes: &[Shape]) -> BVH {
         BVH::build(shapes)
     }
 
