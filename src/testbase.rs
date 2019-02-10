@@ -59,8 +59,9 @@ pub fn generate_aligned_boxes() -> Vec<UnitBox> {
 
 /// Creates a `BoundingHierarchy` for a fixed scene structure.
 pub fn build_some_bh<BH: BoundingHierarchy>() -> (Vec<UnitBox>, BH) {
-    let mut boxes = generate_aligned_boxes();
-    let bh = BH::build(&mut boxes);
+    let boxes = generate_aligned_boxes();
+    let bounds: Vec<AABB> = boxes.iter().map(|a| a.aabb()).collect();
+    let bh = BH::build(bounds.as_slice());
     (boxes, bh)
 }
 

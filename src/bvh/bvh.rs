@@ -224,8 +224,8 @@ impl BVHNode {
     ///
     /// [`BVHNode`]: enum.BVHNode.html
     ///
-    pub fn build<T: BHShape>(
-        shapes: &[T],
+    pub fn build(
+        shapes: &[AABB],
         indices: &[usize],
         nodes: &mut Vec<BVHNode>,
         parent_index: usize,
@@ -244,7 +244,7 @@ impl BVHNode {
 
         let mut convex_hull = Default::default();
         for index in indices {
-            convex_hull = grow_convex_hull(convex_hull, &shapes[*index].aabb());
+            convex_hull = grow_convex_hull(convex_hull, &shapes[*index]);
         }
         let (aabb_bounds, centroid_bounds) = convex_hull;
 
@@ -294,8 +294,7 @@ impl BVHNode {
             // In this branch the `split_axis_size` is large enough to perform meaningful splits.
             // We start by assigning the shapes to `Bucket`s.
             for idx in indices {
-                let shape = &shapes[*idx];
-                let shape_aabb = shape.aabb();
+                let shape_aabb = &shapes[*idx];
                 let shape_center = shape_aabb.center();
 
                 // Get the relative position of the shape centroid `[0.0..1.0]`.
@@ -411,7 +410,7 @@ impl BVH {
     ///
     /// [`BVH`]: struct.BVH.html
     ///
-    pub fn build<Shape: BHShape>(shapes: &[Shape]) -> BVH {
+    pub fn build(shapes: &[AABB]) -> BVH {
         let indices = (0..shapes.len()).collect::<Vec<usize>>();
         let expected_node_count = shapes.len() * 2;
         let mut nodes = Vec::with_capacity(expected_node_count);
@@ -693,7 +692,7 @@ impl BVH {
 }
 
 impl BoundingHierarchy for BVH {
-    fn build<Shape: BHShape>(shapes: &[Shape]) -> BVH {
+    fn build(shapes: &[AABB]) -> Self {
         BVH::build(shapes)
     }
 

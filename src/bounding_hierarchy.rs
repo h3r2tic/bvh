@@ -1,6 +1,7 @@
 //! This module defines the `BoundingHierarchy` trait.
 
 pub use crate::aabb::Bounded as BHShape;
+use crate::aabb::AABB;
 use crate::ray::Ray;
 
 /// This trait defines an acceleration structure with space partitioning.
@@ -58,7 +59,7 @@ pub trait BoundingHierarchy {
     ///
     /// [`BoundingHierarchy`]: trait.BoundingHierarchy.html
     ///
-    fn build<Shape: BHShape>(shapes: &[Shape]) -> Self;
+    fn build(shapes: &[AABB]) -> Self;
 
     /// Traverses the [`BoundingHierarchy`].
     /// Returns a subset of `shapes`, in which the [`AABB`]s of the elements were hit by `ray`.
