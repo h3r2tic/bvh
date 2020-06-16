@@ -26,21 +26,21 @@ This library is built on top of [nalgebra](http://nalgebra.org/).
 ```rust
 use bvh::aabb::{AABB, Bounded};
 use bvh::bvh::BVH;
-use bvh::nalgebra::{Point3, Vector3};
+use bvh::glam::Vec3;
 use bvh::ray::Ray;
 
-let origin = Point3::new(0.0,0.0,0.0);
-let direction = Vector3::new(1.0,0.0,0.0);
+let origin = Vec3::new(0.0,0.0,0.0);
+let direction = Vec3::new(1.0,0.0,0.0);
 let ray = Ray::new(origin, direction);
 
 struct Sphere {
-    position: Point3<f32>,
+    position: Vec3,
     radius: f32,
 }
 
 impl Bounded for Sphere {
     fn aabb(&self) -> AABB {
-        let half_size = Vector3::new(self.radius, self.radius, self.radius);
+        let half_size = Vec3::new(self.radius, self.radius, self.radius);
         let min = self.position - half_size;
         let max = self.position + half_size;
         AABB::with_bounds(min, max)
@@ -49,7 +49,7 @@ impl Bounded for Sphere {
 
 let mut spheres = Vec::new();
 for i in 0..1000u32 {
-    let position = Point3::new(i as f32, i as f32, i as f32);
+    let position = Vec3::new(i as f32, i as f32, i as f32);
     let radius = (i % 10) as f32 + 1.0;
     spheres.push(Sphere {
         position: position,

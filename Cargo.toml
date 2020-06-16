@@ -14,8 +14,8 @@ keywords = ["bvh", "bounding", "volume", "sah", "aabb"]
 license = "MIT"
 
 [dependencies]
-approx = "0.3"
-nalgebra = "0.18"
+#approx = "0.3"
+glam = "0.8"
 rand = "0.7"
 log = "0.4"
 
